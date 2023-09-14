@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NoTodos from './NoTodos';
 import TodoForm from './TodoForm';
 import TodoList from './TodoList';
@@ -6,6 +6,8 @@ import '../reset.css';
 import '../App.css';
 
 function App() {
+    const [name, setName] = useState('');
+    const nameInputEl = useRef(null);
     const [todos, setTodos] = useState([
         {
             id: 1,
@@ -99,9 +101,14 @@ function App() {
         setTodos(updatedTodos);
     }
 
-    function remaining() {
+    function remainingCalculation() {
+        // console.log('calculating remaining todos. This is slow.');
+        // for (let index = 0; index < 2000000000; index++) {}
         return todos.filter(todo => !todo.isComplete).length;
     }
+
+    const remaining = useMemo(remainingCalculation, [todos]);
+
 
     function clearCompleted() {
         setTodos([...todos].filter(todo => !todo.isComplete));
@@ -127,9 +134,32 @@ function App() {
         }
     }
 
+    useEffect(() => {
+        // console.log('use effect running');
+        nameInputEl.current.focus();
+
+        return function cleanup() {
+            // console.log('cleaning up');
+        };
+    }, []);
+
     return (
         <div className="todo-app-container">
             <div className="todo-app">
+                <div className="name-container">
+                    <h2>What is your name?</h2>
+                    <form action="#">
+                        <input
+                            type="text"
+                            ref={nameInputEl}
+                            className="todo-input"
+                            placeholder="What is your name"
+                            value={name}
+                            onChange={event => setName(event.target.value)}
+                        />
+                    </form>
+                    {name && <p className="name-label">Hello, {name}</p>}
+                </div>
                 <h2>Todo App</h2>
                 <TodoForm addTodo={addTodo} />
                 {todos.length > 0 ? (
@@ -154,3 +184,84 @@ function App() {
 }
 
 export default App;
+
+/////////// Start part one /////////
+/*
+import React from 'react';
+class Item extends React.Component { render() {
+    return (
+        <li> {this.props.name}, ${this.props.price}
+        </li> );
+} }
+class App extends React.Component { state = {
+    items: [
+        { id: 1, name: 'Apple', price: 0.99 },
+        { id: 2, name: 'Orange', price: 0.89 },
+    ] };
+
+    nameRef = React.createRef();
+    priceRef = React.createRef();
+
+    add = (name , price) => {
+        let id = this.state.items.length + 1;
+        this.setState({ items: [
+                ...this.state.items,
+                { id, name: name, price: price  }
+            ]
+        });
+    };
+
+    render() { return (
+        <div>
+            <h1>Hello React</h1>
+            <ul>
+                {this.state.items.map(i => { return (
+                    <Item
+                        key={i.id}
+                        name={i.name}
+                        price={i.price}
+                    />
+                )
+                })}
+            </ul>
+            <AddForm add={this.add} />
+        </div>
+    ) }
+}
+
+class AddForm extends React.Component {
+    nameRef = React.createRef(); priceRef = React.createRef();
+    add = () => {
+        let name = this.nameRef.current.value;
+        let price = this.priceRef.current.value;
+        this.props.add(name, price);
+    };
+
+    render() { return (
+        <div>
+            <input type="text" ref={this.nameRef} /><br />
+            <input type="text" ref={this.priceRef} /><br />
+            <button onClick={this.add}>Add</button>
+        </div> )
+    }
+} */
+/////////// End part one /////////
+/*import React from 'react';
+
+class Toolbar extends React.Component { render() {
+    return (
+        <div style={{ background: 'cyan', padding: 10 }}>
+            {this.props.children} </div>
+    ); }
+}
+class App extends React.Component { render() {
+    return ( <div>
+        <Toolbar>
+            <h1>Hello React</h1>
+            <h2>Component composition</h2>
+        </Toolbar>
+    </div> )
+} }
+
+export default App;
+*/
